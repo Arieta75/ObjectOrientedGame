@@ -14,7 +14,7 @@ public class Room {
    public Room east;
    public Room west;
    
-   //constructor 
+   //constructor with overloading for directions
    public Room(String name, String description) {
       this.name = name;
       this.description = description;
@@ -22,22 +22,21 @@ public class Room {
    }
    
    //creation of rooms using the constructor
-   public static Room kitchen = new Room("kitchen", "There are pots and pans piled up in the sink, but otherwise it's clean and bright. " +
-                                         "The cupboards are painted a cheerful light blue" +
-                                        ", and the fridge is covered in various bits of paper and magnets.\n");
+   public static Room kitchen = new Room("kitchen", "Pots and pans are piled up in the sink and the table is strewn with a messy pile of papers, but sunlight shines cheerfully through the windows " +
+                                         "and the faint scent of baked goods lingers in the air. The fridge has lots of delicious leftovers, and makes you think about grabbing a quick 'snack'.\n");
       
    public static Room livingRoom = new Room("living room", "Ahhh, what you wouldn't give to sink into that comfy couch." +
-                                            " She may be stained and creaky, but by god is she great for a nap. Evidence of your last nap is still here - "+
-                                               "there are blankets and pillows strewn about haphazardly.\n");
+                                            " She may be stained and creaky, but by god is she great for taking a 'nap'. In fact, the evidence of your last nap is still here - "+
+                                               "there are blankets and pillows strewn about haphazardly, great hiding spots for an errant piece of clothing.\n");
    
-   public static Room bathroom = new Room("bathroom","This place is definitely due for a cleaning on your next weekend off. The sink is a bit rusty, and the window is permanently stuck open a crack" +
-                                      ", but the shower provides hot water and that's all you really need. You often leave your clothes piled up on the counter when you shower -" +
+   public static Room bathroom = new Room("bathroom","I hope you didn't come in here to 'use the toilet' - this place is definitely due for a cleaning on your next weekend off. The room is small, and the window is permanently stuck open a crack" +
+                                      ", but it's got hot water and that's all that you really need. You often leave your clothes piled up on the counter before you shower -" +
                                           " could you have left your lucky socks or work shirt somewhere here?\n");
    
-   public static Room bedroom = new Room("bedroom","There's a cozy bed in one corner, beside which a sturdy bedside table stands. A dresser stands against the far wall" +
+   public static Room bedroom = new Room("bedroom","There's a cozy bed that looks perfect to 'sleep' on, beside which a sturdy bedside table stands. A dresser stands against the far wall" +
                                       " and a positively overflowing laundry hamper just peeks out from within your dark closet. It's a small room, but a comfortable one.\n");
    
-   public static Room closet = new Room("closet", "Well. This is cramped. You struggled to stop various sports gear from falling out and finally jam it into a vague equilibrium." +
+   public static Room closet = new Room("closet", "Well. This is cramped. You struggle to stop various sports gear from falling out and finally jam it into a vague equilibrium." +
                                         " Why did you come in here again?\n");
    
    public static Room entranceRoom = new Room("entrance room", "You can leave the comfort of your house from here and go to work. Why would you want to, though?\n");
@@ -49,7 +48,6 @@ public class Room {
    
    public static void setSurroundings() {
       for(int i = 0; i < Item.allRooms.length; i++) {
-         
          if(Item.allRooms[i] == kitchen) {
             kitchen.west = hallway;
             kitchen.north = notARoom;
@@ -99,16 +97,16 @@ public class Room {
             closet.west = notARoom;
             closet.south = notARoom;
          }
+         
       }
    }
    
    public String[] getSurroundings(Room currRoom) {
-      //only one if block can execute in the above code
-      //when that block executes, it will create .north/.west/etc. when appropriate but leave the others null
+      //rooms that don't exist are filled with the placeholder notARoom to avoid null pointer exceptions
+      //the name of notARoom ("nothing") will print if the room doesn't exist
       String[] surround = {"N: " + this.north.name, "E: " + this.east.name, "W: " + this.west.name, "S: " + this.south.name};
       return surround;
    }
-   
    
    public static void displayMap() {
       Game.print("-----------------------------------------\n" +
@@ -117,7 +115,7 @@ public class Room {
                  "|               |      living           |\n" +
                  "|               |        room           |\n" +
                  "|   bedroom     |                       |\n" +
-                 "|               |--   --------    ------|\n" +
+                 "|               |--   ------------------|\n" +
                  "|               |        |              |\n" +
                  "|               |        |              |\n" +
                  "|               |        |              |\n" +
@@ -127,10 +125,10 @@ public class Room {
                  "|               |        |              |\n" +
                  "|---------------|--    --|--------------|\n" +
                  "|      |                 |               \n" +   
-                 "|closet|    entrance     |               \n" +
-                 "|      |     room        |               \n" +
-                 "|      |                 |               \n" +
-                 "--------------------------               \n",10);
+                 "|closet|     entrance    |               \n" +
+                 "|      |      room                       \n" +
+                 "|                        |               \n" +
+                 "--------------------------               \n",5);
       
       
    }

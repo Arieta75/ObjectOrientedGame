@@ -15,15 +15,15 @@ public class Game {
       String playerName = sc.next();
       print("\n",2);
       
-      String openMessage = "Welcome, " + playerName + ". Before we begin, select your text speed by typing in " + 
-         "'1' for slow, '2' for medium (default), or '3' for fast into the console.";
-      print(openMessage + "\n",2);
+      String openMessage = "Welcome, " + playerName + ". Before we begin, you can change the speed of your text display to" +
+                           " either speed it up or slow it down. ";
+      print(openMessage,2);
       
-      int speed = sc.nextInt();
-      while(speed != 1 && speed != 2 && speed != 3) {
+      int speed = changeSpeed(2);
+      /*while(speed != 1 && speed != 2 && speed != 3) {
          print("I'm sorry, I didn't understand that. Please type in '1', '2', or '3'.\n",2);
          speed = sc.nextInt();         
-      }
+      }*/
       
       print("You can change the speed by entering the command 'change speed' at any time.\n",speed);
       
@@ -44,54 +44,51 @@ public class Game {
            // "\nIt takes you 20min to drive to work on a good day, leaving you exactly 26min to get dressed and head outside." +
             "\nNavigate your way through the house and find the 4 pieces of clothing you'll need in order to go to work. Good luck!\n\n";
       
-      //print(story, speed);
+      print(story, speed);
       
       String prompt = "To get started, why don't you try to take a 'look' around?\n";
       print(prompt,speed);
       
       while(!input.contains("quit")) {
-         input = player1.getInput("\nWhat would you like to do next?\n");
+         //if endGame() returns true, get input from the user and proceed as normal; else, if endGame() returns false
+         //(which only happens once player has won) force the input to be quit and print the goodbye message and end loop
+         if(player1.endGame()) {         
+            input = player1.getInput("\nWhat would you like to do next?\n");
+         } else {
+            input = "quit";
+         }
             
          if(input.contains("help")) {
             print("The following commands are available actions for your player. Simply type in your command to the console: \n", speed);
             print("\t'help' - I think you've got this one down pat now. Good job.\n", speed);
             print("\t'quit' - End the game. :(\n", speed);
-            print("\t'look' - Look around the current room you are in.\n", speed);
+            print("\t'change speed' - Select a new text speed for reading.\n", speed);
+            
+            print("\n\t'look' - Look around the current room you are in.\n", speed);
             print("\t'search room' - Search your current location for an item of clothing you might want.\n", speed);
             print("\t'view map' - See what rooms are connected to the one you currently stand in.\n", speed);
             print("\t'move + <direction>' - Move north, east, south, or west and enter a different room.\n", speed);
-            print("\t'pick up + <item name>' - Store an item in your inventory, provided you have enough space.\n", speed);
-            print("\t'drop + <item name>' - Drop an item in whatever the player's current room is.\n",speed);
-            print("\t'open inventory' - Look at all the cool things you have.\n", speed);
-            print("\t'examine + <item name>' - Learn more about an item in your inventory.\n", speed);
-            print("\t'change speed' - Select a new text speed for reading.\n", speed);
+            
+            print("\n\t'pick up + <item name>' - Pick up an item from your current location and keep it handy.\n", speed);
+            print("\t'examine + <item name>' - Learn more about the item you're currently holding.\n", speed);
+            print("\t'keep' - Store whatever you're holding within your inventory.\n", speed);
+            print("\t'drop + <item name>' - Drop whatever you're holding in the room you're standing in.\n",speed);
+            print("\t'open inventory' - Look at all the cool things you've decided to keep.\n", speed);
+            
          } else if (input.contains("quit")) {
+            //prints a goodbye message to the player, then stops the while loop asking for input
             print("Goodbye, " + player1.getName() + ".", speed);
-
-//EXAMINE COMMANDS
+         } else if (input.contains("speed")) {
+            //changes the speed of the text display
+            speed = changeSpeed(speed);
+            player1.setSpeed(speed);
+//MOVEMENT AND SEARCH COMMANDS
          } else if (input.contains("look")) {
-            player1.lookAround(); //prints a description of the player's current room
+            //prints a description of the player's current room
+            player1.lookAround(); 
          } else if (input.contains("search")) {
-            Room currRoom = player1.getCurrentRoom();
-            if(currRoom == Room.bedroom) {
-               player1.searchBedroom();
-            } else if(currRoom == Room.kitchen) {
-               player1.searchKitchen();
-            } else if(currRoom == Room.bathroom) {
-               player1.searchBathroom();
-            } else if(currRoom == Room.livingRoom) {
-               player1.searchLivingRoom();
-            } else if(currRoom == Room.hallway) {
-               player1.searchHallway();
-            } else if(currRoom == Room.entranceRoom) {
-               player1.searchEntranceHall();
-            } else if(currRoom == Room.closet) {
-               player1.searchCloset();
-            } else { //shouldn't ever be reached
-               System.out.println("Error searching.");
-            }
-
-//MOVE COMMANDS
+            //checks whether the player's current room hasItem and returns the items present if appropriate
+            player1.search();
          } else if (input.equals("move")) { 
             Game.print("Please specify the direction (e.g. 'move north') that you'd like to move.\n",speed);
          } else if (input.contains("move") && input.contains("north")) {
@@ -102,22 +99,57 @@ public class Game {
             player1.moveWest(); //updates current room to west room, if it exists
          } else if (input.contains("move") && input.contains("south")) {
             player1.moveSouth(); //updates current room to south room, if it exists
-
+         } else if (input.contains("map")) {
+            //gives the rooms located north, east, south, and west
+            //optionally prints an ASCII map of the house's floor plan
+            print("Don't worry, we all forget how our houses are laid out from time to time. Your face screws up in concentration as you " +
+                  "try to determine where the doors lead from your current position. After some deliberation, you reach " +
+                  "the following conclusions about your surroundings: \n", speed);
+            String[] surround = player1.getCurrentRoom().getSurroundings(player1.getCurrentRoom());
+            for(int i = 0; i < surround.length; i++) {
+               print(surround[i] + "  ",speed);
+            }
+            String answer = player1.getInput("\nWould you like to see a map of the entire house? (yes/no)");
+            if(answer.equals("yes")) {
+               Room.displayMap();
+            } else if (!answer.equals("no") && !answer.equals("yes")) {
+               print("Sorry, I didn't understand that. \n", speed);
+            }
 //INVENTORY COMMANDS
          } else if (input.contains("pick up")) {
             //this method should let a player enter the name of the item they would like to pick up
             //then set that item to the player's current item
             player1.pickUp();
-         } else if (input.contains("keep")) {
-            player1.setInventory(player1.getCurrentItem());
-         } else if (input.contains("drop")) {
-            player1.drop();
          } else if (input.contains("examine")) {
-            player1.examine(); //prints out a description of an item **add the argument Item to this  
-         } else if (input.contains("open") || input.contains("inventory")) {
-            player1.viewInventory(); //prints out the array of items in the player's inventory        
-         } else { //if the input doesn't match any of the possible commands, display error and then loop back up to get new input
-            print("Sorry, I didn't understand that. ", speed);
+            //prints out a description of whatever item the player currently holds 
+            player1.examine(); 
+         } else if (input.contains("keep")) {
+            //this method should store the player's current item in their inventory
+            player1.keep();
+         } else if (input.contains("drop")) {
+            //this will drop the player's current item if possible
+            if(player1.getCurrentItem() != null) {
+               Item curr = player1.getCurrentItem();
+               player1.drop(curr);
+               player1.setCurrentItem(null);
+               Game.print("You put down the " + curr.name + " and back away slowly.\n", speed);
+            } else {
+               Game.print("You're not holding anything right now!\n", speed);
+            }
+         } else if (input.contains("inventory")) {
+            //prints out the array of items in the player's inventory        
+            player1.viewInventory(); 
+         
+//OTHER COMMANDS
+         } else if (input.contains("sleep") || input.contains("nap")) {
+            player1.sleep(); //take a quick nap
+         } else if (input.contains("use the toilet")) {
+            player1.useBathroom(); //use the loo
+         } else if (input.contains("eat") || input.contains("snack")) {
+            player1.snackBreak(); //grab a bite to eat
+         } else { 
+            //if the input doesn't match any of the possible commands, display error and then loop back up to get new input
+            print("Sorry, I didn't understand that.\n", speed);
          }
       
       }
@@ -139,18 +171,19 @@ public class Game {
          System.out.print(message.charAt(i));
          
          if(message.charAt(i) == '\n') { 
-            //modify the speed for the printing of a new line with a short wait time
-            wait(200);
+            wait(200); //wait 200ms every time a new line is printed
          } else {
-            //modify the speed for the printing of each character depending on the player's choice
-            if(speed == 2) {
-               wait(15);
+            //note: if '3' is selected, just print each char in order without delay
+            if(speed == 2) { //medium, default
+               wait(15); //wait 15ms between characters
             } 
-            //modify the speed for 'slow'
-            else if (speed == 1) {
-               wait(50);
+            else if (speed == 1) { //slow
+               wait(30); //wait 30ms between characters
             }
-            //don't modify the speed if 'fast' was selected
+            else if (speed != 3) { 
+               //for personal use within code to print specific messages slowly
+               wait(speed);
+            }
          }
       }
    }
@@ -158,31 +191,37 @@ public class Game {
    public static int changeSpeed(int speed) {
       Scanner sc = new Scanner(System.in);
       print("Would you like to change the speed of the text display? Enter '1' for slow, '2' for medium, " +
-                         "and '3' for fast. Your current speed is: " + speed +"\n", speed);
+            "and '3' for fast. Your current speed is: " + speed +"\n", speed);
       
-      try {
-         speed = sc.nextInt();
-      } catch (InputMismatchException e) {
-         Game.print("Sorry, you didn't enter a valid number just now. The speed will now be set to the default value of '2'.", 2);
-         speed = 2;
-      }
+      boolean validInput = false;
       
-      //loops until the integer input is 1, 2, or 3
-      while(speed != 1 && speed != 2 && speed != 3) {
-         print("I'm sorry, that's not a valid selection. Please type in '1', '2', or '3'.\n",2);
-         speed = sc.nextInt();
-      }
+      while(!validInput) {
+         try {
+            speed = sc.nextInt();
+            //first, try and catch an input mismatch
+            //loops until the integer input is 1, 2, or 3
+            while(speed != 1 && speed != 2 && speed != 3) {
+               print("I'm sorry, that's not a valid selection. Please type in '1', '2', or '3'.\n",2);
+               speed = sc.nextInt();
+            }
+            validInput = true;
+         } catch (InputMismatchException e) {
+            Game.print("Sorry, you didn't enter a valid number just now. The speed will now be set to the default value of '2'.", 2);
+            speed = 2;
+         }
+      } 
       sc.close();
-      
       return speed;
+      
    }
    
    public static void wait(int modifier) {
       long start = System.currentTimeMillis();
-      long ms = 0;
-         
+      //long ms = 0;
+      //continuously updates the current time and finds the time passed since method was called
+      //once the time passed is greater than the modifier (in # ms) passed to it, while loop stops and method ends
       while(System.currentTimeMillis() - start < modifier) {
-         ms++;
+         //don't actually want to do anything except wait
       }
    }
 }
